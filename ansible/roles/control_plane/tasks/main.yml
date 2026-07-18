@@ -30,3 +30,37 @@
     group: ubuntu
     mode: "0600"
 
+- name: Install the Tigera (Calico) operator
+  ansible.builtin.command: >
+    kubectl apply --server-side
+    -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.0/manifests/tigera-operator.yaml
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  changed_when: false
+
+- name: Write the Calico installation config
+  ansible.builtin.copy:
+    dest: /root/calico-installation.yaml
+    content: |
+      apiVersion: operator.tigera.io/v1
+      kind: Installation
+      metadata:
+        name: default
+      spec:
+        calicoNetwork:
+          ipPools:
+            - name: default-ipv4-ippool
+              cidr: 10.244.0.0/16
+              encapsulation: VXLANCrossSubnet
+              natOutgoing: Enabled
+              nodeSelector: all()
+
+- name: Apply the Calico installation
+  ansible.builtin.command: kubectl apply -f /root/calico-installation.yaml
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: calico_apply
+  until: calico_apply.rc == 0
+  retries: 5
+  delay: 10
+  changed_when: "'created' in calico_apply.stdout or 'configured' in calico_apply.stdout"
