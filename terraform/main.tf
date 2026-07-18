@@ -6,4 +6,5 @@ resource "multipass_instance" "node" {
   cpus = each.value.cpus
   memory = each.value.memory
   disk = each.value.disk
+  cloudinit_file = "${path.module}/cloud-init.yaml"
 }
