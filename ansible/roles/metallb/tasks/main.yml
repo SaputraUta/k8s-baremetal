@@ -1,0 +1,8 @@
+---
+- name: Install MetalLB
+  ansible.builtin.command: >
+    kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: metallb_apply
+  changed_when: "'created' in metallb_apply.stdout or 'configured' in metallb_apply.stdout"

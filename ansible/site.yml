@@ -10,3 +10,15 @@
   become: true
   roles:
     - control_plane
+
+- name: Join workers to the cluster
+  hosts: workers
+  become: true
+  roles:
+    - worker
+
+- name: Install MetalLB
+  hosts: control_plane
+  become: true
+  roles:
+    - metallb
