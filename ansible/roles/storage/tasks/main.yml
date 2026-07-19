@@ -1,0 +1,16 @@
+---
+- name: Install local-path-provisioner
+  ansible.builtin.command: >
+    kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.30/deploy/local-path-storage.yaml
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: storage_apply
+  changed_when: "'created' in storage_apply.stdout or 'configured' in storage_apply.stdout"
+
+- name: Set local-path as the default StorageClass
+  ansible.builtin.command: >
+    kubectl patch storageclass local-path
+    -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  changed_when: false

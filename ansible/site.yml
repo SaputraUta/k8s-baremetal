@@ -28,3 +28,9 @@
   become: true
   roles:
     - ingress
+
+- name: Install storage (local-path-provisioner)
+  hosts: control_plane
+  become: true
+  roles:
+    - storage
