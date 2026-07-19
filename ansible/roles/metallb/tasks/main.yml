@@ -6,3 +6,35 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
   register: metallb_apply
   changed_when: "'created' in metallb_apply.stdout or 'configured' in metallb_apply.stdout"
+
+- name: Write the MetalLB address pool config
+  ansible.builtin.copy:
+      dest: /root/metallb-pool.yaml
+      content: |
+        apiVersion: metallb.io/v1beta1
+        kind: IPAddressPool
+        metadata:
+          name: default-pool
+          namespace: metallb-system
+        spec:
+          addresses:
+            - 192.168.252.240-192.168.252.250
+        ---
+        apiVersion: metallb.io/v1beta1
+        kind: L2Advertisement
+        metadata:
+          name: default-l2
+          namespace: metallb-system
+        spec:
+          ipAddressPools:
+            - default-pool
+
+- name: Apply the MetalLB address pool
+  ansible.builtin.command: kubectl apply -f /root/metallb-pool.yaml
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: metallb_pool
+  until: metallb_pool.rc == 0
+  retries: 5
+  delay: 10
+  changed_when: "'created' in metallb_pool.stdout or 'configured' in metallb_pool.stdout"

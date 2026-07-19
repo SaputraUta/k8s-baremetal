@@ -1,0 +1,8 @@
+---
+- name: Install ingress-nginx controller
+  ansible.builtin.command: >
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.3/deploy/static/provider/cloud/deploy.yaml
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: ingress_apply
+  changed_when: "'created' in ingress_apply.stdout or 'configured' in ingress_apply.stdout"

@@ -22,3 +22,9 @@
   become: true
   roles:
     - metallb
+
+- name: Install ingress-nginx
+  hosts: control_plane
+  become: true
+  roles:
+    - ingress
